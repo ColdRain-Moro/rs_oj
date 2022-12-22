@@ -1,0 +1,1 @@
+fn main() { let mut a = String::new();let mut b = String::new();std::io::stdin().read_line(&mut a).expect("");std::io::stdin().read_line(&mut b).expect("");let a = a.parse::<i32>().unwrap();let b = b.parse::<i32>().unwrap();println!("{}", a + b);}

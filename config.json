@@ -1,0 +1,44 @@
+{
+    "server": {
+        "bind_address": "localhost",
+        "bind_port": 8080
+    },
+    "problems": [
+        {
+            "id": 0,
+            "name": "aplusb",
+            "type": "standard",
+            "misc": {},
+            "cases": [
+                {
+                    "score": 50.0,
+                    "input_file": "./data/aplusb/1.in",
+                    "answer_file": "./data/aplusb/1.ans",
+                    "time_limit": 1000000,
+                    "memory_limit": 1048576
+                },
+                {
+                    "score": 50.0,
+                    "input_file": "./data/aplusb/2.in",
+                    "answer_file": "./data/aplusb/2.ans",
+                    "time_limit": 1000000,
+                    "memory_limit": 1048576
+                }
+            ]
+        }
+    ],
+    "languages": [
+        {
+            "name": "Rust",
+            "file_name": "main.rs",
+            "command": [
+                "rustc",
+                "-C",
+                "opt-level=2",
+                "-o",
+                "%OUTPUT%",
+                "%INPUT%"
+            ]
+        }
+    ]
+}
