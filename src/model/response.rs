@@ -19,4 +19,12 @@ impl<T> BaseResponse<T> {
     pub fn ok(data: T) -> Self {
         Self { error_code: 0, message: "ok".to_string(), data: Some(data) }
     }
+
+    pub fn ok_with(data: Option<T>) -> Self {
+        Self { error_code: 0, message: "ok".to_string(), data }
+    }
+    
+    pub fn ok_with_none() -> Self {
+        Self { error_code: 0, message: "ok".to_string(), data: None }
+    }
 }

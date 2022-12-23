@@ -18,7 +18,7 @@ pub mod response;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Job {
-    id: u32,
+    pub id: u32,
     params: PostJobParams,
     language: Language,
     problem: Problem,

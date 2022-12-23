@@ -1,4 +1,5 @@
 #![feature(let_chains)]
+#![feature(option_result_contains)]
 
 use std::{fs, sync::Mutex};
 use std::cell::Cell;
@@ -42,6 +43,9 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .app_data(app_state.clone())
             .service(controller::jobs::post_job)
+            .service(controller::jobs::get_jobs)
+            .service(controller::jobs::get_job_by_id)
+
     })
     .bind((server.bind_address, server.bind_port))?
     .run()

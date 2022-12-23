@@ -1,8 +1,9 @@
 use std::sync::Mutex;
 
 use actix_web::{post, Responder, web, get, put, delete, HttpResponse};
+use iter_tools::Itertools;
 
-use crate::{AppState, model::request::{PostJobParams, QueryJobParams}};
+use crate::{AppState, JOB_LIST, model::request::{PostJobParams, QueryJobParams}};
 use crate::err::AppError;
 use crate::model::config::{Language, Problem};
 use crate::model::Job;
@@ -58,21 +59,56 @@ pub async fn post_job(body: web::Json<PostJobParams>, data: web::Data<Mutex<AppS
 }
 
 #[get("/jobs")]
-pub async fn get_jobs(query: web::Query<QueryJobParams>, data: web::Data<Mutex<AppState>>) -> Result<impl Responder, AppError> {
-    Ok("")
+pub async fn get_jobs(query: web::Query<QueryJobParams>) -> Result<impl Responder, AppError> {
+    let params = query.into_inner();
+    let lock = JOB_LIST.lock().unwrap();
+    let res: Vec<Job> = lock.iter()
+        .filter(|job| params.matches(job))
+        .map(|job| job.clone())
+        .collect();
+    Ok(HttpResponse::Ok().json(BaseResponse::ok(res)))
 }
 
 #[get("/jobs/{jobId}")]
-pub async fn get_job_by_id(job_id: web::Path<i32>, data: web::Data<Mutex<AppState>>) -> Result<impl Responder, AppError> {
-    Ok("")
+pub async fn get_job_by_id(job_id: web::Path<u32>) -> Result<impl Responder, AppError> {
+    let job_id = job_id.into_inner();
+    let lock = JOB_LIST.lock().unwrap();
+    let res = lock.iter()
+        .rfind(|job| job.id == job_id)
+        .map(|job| job.clone());
+    Ok(HttpResponse::Ok().json(BaseResponse::ok_with(res)))
 }
 
 #[put("/jobs/{jobId}")]
-pub async fn put_job_by_id(job_id: web::Path<i32>, data: web::Data<Mutex<AppState>>) -> Result<impl Responder, AppError> {
-    Ok("")
+pub async fn put_job_by_id(job_id: web::Path<u32>) -> Result<impl Responder, AppError> {
+    let job_id = job_id.into_inner();
+    let lock = JOB_LIST.lock().unwrap();
+    let res = lock.iter()
+        .rfind(|job| job.id == job_id)
+        .map(|job| job.clone());
+    if let Some(mut job) = res {
+        if let Err(_) = job.run() {
+            job.system_error();
+        }
+        return Ok(
+            HttpResponse::Ok()
+                .json(
+                    BaseResponse::ok(job)
+                )
+        )
+    }
+    Ok(HttpResponse::Ok().json(BaseResponse::<Job>::bad_request("can not found this job!")))
 }
 
 #[delete("/jobs/{jobId}")]
-pub async fn delete_job_by_id(job_id: web::Path<i32>, data: web::Data<Mutex<AppState>>) -> Result<impl Responder, AppError> {
-    Ok("")
+pub async fn delete_job_by_id(job_id: web::Path<u32>) -> Result<impl Responder, AppError> {
+    let job_id = job_id.into_inner();
+    let mut lock = JOB_LIST.lock().unwrap();
+    let option = lock.iter()
+        .find_position(|job| job.id == job_id);
+    if let Some((pos, _)) = option {
+        lock.remove(pos);
+        return Ok(HttpResponse::Ok().json(BaseResponse::<i32>::ok_with_none()))
+    }
+    Ok(HttpResponse::Ok().json(BaseResponse::<i32>::bad_request("can not found this job!")))
 }
